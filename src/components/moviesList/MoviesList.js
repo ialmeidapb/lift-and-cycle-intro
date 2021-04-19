@@ -4,25 +4,36 @@ import movies from "../../data/data.json";
 
 import MovieCard from "./MovieCard";
 import NewMovieForm from "../form/NewMovieForm";
+import TextInput from "../form/TextInput";
 
 class MoviesList extends React.Component {
   state = {
     moviesList: [...movies.results],
     originalList: [...movies.results],
-    ordered: false,
+    searchedMovie: "",
+  };
+
+  componentDidMount = () => {
+    console.log("componentDidMount");
+  };
+
+  componentDidUpdate = (prevProps, prevState) => {
+    if (prevState.searchedMovie !== this.state.searchedMovie) {
+      const filteredArray = this.state.originalList.filter((movie) =>
+        movie.title
+          .toLowerCase()
+          .includes(this.state.searchedMovie.toLowerCase())
+      );
+      this.setState({ moviesList: filteredArray });
+    }
   };
 
   handleDelete = (titleToDelete) => {
-    const filteredMovies = this.state.moviesList.filter(
+    const filteredMovies = this.state.originalList.filter(
       (movie) => movie.title !== titleToDelete
     );
-    this.setState({ moviesList: filteredMovies });
+    this.setState({ moviesList: filteredMovies, originalList: filteredMovies });
   };
-
-  //   handleAdding = (movie) => {
-  //     const newList = [movie, ...this.state.moviesList];
-  //     this.setState({ moviesList: newList });
-  //   };
 
   handleAdding = (title, overview) => {
     const newMovie = { title: title, overview: overview };
@@ -30,11 +41,10 @@ class MoviesList extends React.Component {
     this.setState({ moviesList: newList });
   };
 
-  handleOrdering = () => {
-    const sorted = [...this.state.moviesList].sort((a, b) =>
-      a.title.localeCompare(b.title)
-    );
-    this.setState({ moviesList: sorted });
+  handleChange = (event) => {
+    this.setState({
+      [event.target.name]: event.target.value,
+    });
   };
 
   render() {
@@ -42,9 +52,13 @@ class MoviesList extends React.Component {
       <div>
         <div className="container">
           <NewMovieForm handleAdding={this.handleAdding} />
-          {/* <button className="btn btn-primary" onClick={this.handleOrdering}>
-            Order
-          </button> */}
+          <TextInput
+            name="searchedMovie"
+            value={this.state.searchedMovie}
+            id="searchedMovie"
+            label="Search"
+            onChange={this.handleChange}
+          />
         </div>
 
         <div className="container d-flex flex-wrap">
